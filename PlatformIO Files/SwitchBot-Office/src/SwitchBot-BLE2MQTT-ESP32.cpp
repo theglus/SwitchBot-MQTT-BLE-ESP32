@@ -332,28 +332,28 @@
 #include <Update.h>
 #include <CRC32.h>
 #include <ArduinoQueue.h>
+#include "secrets.h"
 
 /****************** CONFIGURATIONS TO CHANGE *******************/
 
 /********** REQUIRED SETTINGS TO CHANGE **********/
 
 /* Wifi Settings */
-static const char* host = "esp32";                          //  Unique name for ESP32. The name detected by your router and MQTT. If you are using more then 1 ESPs to control different switchbots be sure to use unique hostnames. Host is the MQTT Client name and is used in MQTT topics
-static const char* ssid = "SSID";                           //  WIFI SSID
-static const char* password = "Password";                   //  WIFI Password
+static const char* host = "bluetooth_gateway";                          //  Unique name for ESP32. The name detected by your router and MQTT. If you are using more then 1 ESPs to control different switchbots be sure to use unique hostnames. Host is the MQTT Client name and is used in MQTT topics
+static const char* ssid = ssid_name;                           //  WIFI SSID
+static const char* password = ssid_password;                   //  WIFI Password
 
 /* MQTT Settings */
 /* MQTT Client name is set to WIFI host from Wifi Settings*/
-static const char* mqtt_host = "192.168.0.1";                       //  MQTT Broker server ip
-static const char* mqtt_user = "switchbot";                         //  MQTT Broker username. If empty or NULL, no authentication will be used
-static const char* mqtt_pass = "switchbot";                         //  MQTT Broker password
+static const char* mqtt_host = mqtt_ip;                       //  MQTT Broker server ip
+static const char* mqtt_user = mqtt_name;                         //  MQTT Broker username. If empty or NULL, no authentication will be used
+static const char* mqtt_pass = mqtt_password;                         //  MQTT Broker password
 static const int mqtt_port = 1883;                                  //  MQTT Port
 static const std::string mqtt_main_topic = "switchbot";             //  MQTT main topic
 
 /* Switchbot Bot Settings */
 static std::map<std::string, std::string> allBots = {
-  /*{ "switchbotone", "xX:xX:xX:xX:xX:xX" },
-    { "switchbottwo", "yY:yY:yY:yY:yY:yY" }*/
+  { "switchbot_pc", kvm_mac },
 };
 
 /* Switchbot Curtain Settings */
@@ -390,9 +390,7 @@ static std::map<std::string, std::string> allPasswords = {     // Set all the bo
 /* Switchbot Bot Device Types - OPTIONAL */
 /* Options include: "switch", "light", "button" */
 static std::map<std::string, std::string> allBotTypes = {     // OPTIONAL - (DEFAULTS to "switch" if bot is not in list) - Will create HA entities for device types
- /* { "switchbotone", "switch" },
-    { "switchbottwo", "light" },
-    { "switchbotthree", "button" }*/
+   /* { "switchbot_pc", "switch" },*/
 };
 
       /*** Bots in PRESS mode to simulate ON/OFF - ESP32 will try to keep track of the ON/OFF state of your device while in PRESS mode***/
@@ -401,8 +399,7 @@ static std::map<std::string, std::string> allBotTypes = {     // OPTIONAL - (DEF
       // true = default state = ON
       // If the state is incorrect, call set STATEOFF or STATEON
       static std::map<std::string, bool> botsSimulateONOFFinPRESSmode = {
-        /*{ "switchbotone", false },
-          { "switchbottwo", false }*/
+        { "switchbot_pc", false },
       };
 
       //Add bots OFF hold time for simulated ON/OFF, if not in list, the current hold value will be used. Device must be in botsSimulateONOFFinPRESSmode list
@@ -765,35 +762,35 @@ void publishHomeAssistantDiscoveryBotConfig(std::string deviceName, std::string 
                  + "\"unit_of_meas\": \"%\", " +
                  + "\"value_template\":\"{{ value_json.batt }}\"}").c_str(), true);
 
-  client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/linkquality/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
-                 + "\"name\":\"" + deviceName + " Linkquality\"," +
-                 + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
-                 + "\"avty_t\": \"" + lastWill + "\"," +
-                 + "\"uniq_id\":\"switchbot_" + deviceMac + "_linkquality\"," +
-                 + "\"stat_t\":\"~/attributes\"," +
-                 + "\"icon\":\"mdi:signal\"," +
-                 + "\"unit_of_meas\": \"rssi\", " +
-                 + "\"value_template\":\"{{ value_json.rssi }}\"}").c_str(), true);
+  // client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/linkquality/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
+  //                + "\"name\":\"" + deviceName + " Linkquality\"," +
+  //                + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
+  //                + "\"avty_t\": \"" + lastWill + "\"," +
+  //                + "\"uniq_id\":\"switchbot_" + deviceMac + "_linkquality\"," +
+  //                + "\"stat_t\":\"~/attributes\"," +
+  //                + "\"icon\":\"mdi:signal\"," +
+  //                + "\"unit_of_meas\": \"rssi\", " +
+  //                + "\"value_template\":\"{{ value_json.rssi }}\"}").c_str(), true);
 
-  client.publish((home_assistant_mqtt_prefix + "/binary_sensor/" + deviceName + "/inverted/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
-                 + "\"name\":\"" + deviceName + " Inverted\"," +
-                 + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
-                 + "\"avty_t\": \"" + lastWill + "\"," +
-                 + "\"uniq_id\":\"switchbot_" + deviceMac + "inverted\"," +
-                 + "\"stat_t\":\"~/settings\"," +
-                 + "\"icon\":\"mdi:cog\"," +
-                 + "\"pl_on\":true," +
-                 + "\"pl_off\":false," +
-                 + "\"value_template\":\"{{ value_json.inverted }}\"}").c_str(), true);
+  // client.publish((home_assistant_mqtt_prefix + "/binary_sensor/" + deviceName + "/inverted/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
+  //                + "\"name\":\"" + deviceName + " Inverted\"," +
+  //                + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
+  //                + "\"avty_t\": \"" + lastWill + "\"," +
+  //                + "\"uniq_id\":\"switchbot_" + deviceMac + "inverted\"," +
+  //                + "\"stat_t\":\"~/settings\"," +
+  //                + "\"icon\":\"mdi:cog\"," +
+  //                + "\"pl_on\":true," +
+  //                + "\"pl_off\":false," +
+  //                + "\"value_template\":\"{{ value_json.inverted }}\"}").c_str(), true);
 
-  client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/mode/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
-                 + "\"name\":\"" + deviceName + " Mode\"," +
-                 + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
-                 + "\"avty_t\": \"" + lastWill + "\"," +
-                 + "\"uniq_id\":\"switchbot_" + deviceMac + "_mode\"," +
-                 + "\"icon\":\"mdi:cog\"," +
-                 + "\"stat_t\":\"~/attributes\"," +
-                 + "\"value_template\":\"{{ value_json.mode }}\"}").c_str(), true);
+  // client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/mode/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
+  //                + "\"name\":\"" + deviceName + " Mode\"," +
+  //                + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
+  //                + "\"avty_t\": \"" + lastWill + "\"," +
+  //                + "\"uniq_id\":\"switchbot_" + deviceMac + "_mode\"," +
+  //                + "\"icon\":\"mdi:cog\"," +
+  //                + "\"stat_t\":\"~/attributes\"," +
+  //                + "\"value_template\":\"{{ value_json.mode }}\"}").c_str(), true);
 
   client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/firmware/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
                  + "\"name\":\"" + deviceName + " Firmware\"," +
@@ -804,23 +801,23 @@ void publishHomeAssistantDiscoveryBotConfig(std::string deviceName, std::string 
                  + "\"stat_t\":\"~/settings\"," +
                  + "\"value_template\":\"{{ value_json.firmware }}\"}").c_str(), true);
 
-  client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/holdsecs/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
-                 + "\"name\":\"" + deviceName + " HoldSecs\"," +
-                 + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
-                 + "\"avty_t\": \"" + lastWill + "\"," +
-                 + "\"uniq_id\":\"switchbot_" + deviceMac + "_holdsecs\"," +
-                 + "\"icon\":\"mdi:cog\"," +
-                 + "\"stat_t\":\"~/settings\"," +
-                 + "\"value_template\":\"{{ value_json.hold }}\"}").c_str(), true);
+  // client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/holdsecs/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
+  //                + "\"name\":\"" + deviceName + " HoldSecs\"," +
+  //                + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
+  //                + "\"avty_t\": \"" + lastWill + "\"," +
+  //                + "\"uniq_id\":\"switchbot_" + deviceMac + "_holdsecs\"," +
+  //                + "\"icon\":\"mdi:cog\"," +
+  //                + "\"stat_t\":\"~/settings\"," +
+  //                + "\"value_template\":\"{{ value_json.hold }}\"}").c_str(), true);
 
-  client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/timers/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
-                 + "\"name\":\"" + deviceName + " Timers\"," +
-                 + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
-                 + "\"avty_t\": \"" + lastWill + "\"," +
-                 + "\"uniq_id\":\"switchbot_" + deviceMac + "_timers\"," +
-                 + "\"icon\":\"mdi:cog\"," +
-                 + "\"stat_t\":\"~/settings\"," +
-                 + "\"value_template\":\"{{ value_json.timers }}\"}").c_str(), true);
+  // client.publish((home_assistant_mqtt_prefix + "/sensor/" + deviceName + "/timers/config").c_str(), ("{\"~\":\"" + (botTopic + deviceName) + "\"," +
+  //                + "\"name\":\"" + deviceName + " Timers\"," +
+  //                + "\"device\": {\"identifiers\":[\"switchbot_" + deviceMac + "\"],\"manufacturer\":\"" + manufacturer + "\",\"model\":\"" + botModel + "\",\"name\": \"" + deviceName + "\" }," +
+  //                + "\"avty_t\": \"" + lastWill + "\"," +
+  //                + "\"uniq_id\":\"switchbot_" + deviceMac + "_timers\"," +
+  //                + "\"icon\":\"mdi:cog\"," +
+  //                + "\"stat_t\":\"~/settings\"," +
+  //                + "\"value_template\":\"{{ value_json.timers }}\"}").c_str(), true);
 
   std::string optiString;
   if (optimistic) {
