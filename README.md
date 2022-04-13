@@ -313,35 +313,6 @@ Notes:
 <br>
 <br>
 
-## Steps to Install on ESP32 - Using Arduino IDE ##
-
-1. Install Arduino IDE
-2. Setup IDE for proper ESP32 type
-     https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/
-3. Install NimBLEDevice library
-4. Install EspMQTTClient library
-5. Install ArduinoJson library
-6. Install CRC32 library (by Christopher Baker)
-7. Install ArduinoQueue library
-8. Modify code for your Wifi and MQTT configurations and SwitchBot MAC addresses
-
-	Configurations to change can be found in the code under these line...
-	```
-	/****************** CONFIGURATIONS TO CHANGE *******************/
-
-	/********** REQUIRED SETTINGS TO CHANGE **********/
-	```
-
-	Stop when you see this line...
-	```
-	/********** ADVANCED SETTINGS - ONLY NEED TO CHANGE IF YOU WANT TO TWEAK SETTINGS **********/
-	```
-10. Compile and upload to ESP32 (I am using Wemos D1 Mini ESP32)
-11. Reboot ESP32 plug it in with 5v usb (no data needed)
-
-<br>
-<br>
-
 ## Steps to Install on ESP32 - Using Visual Studio Code - PlatformIO ##
 
 1. Install Visual Studio Code
